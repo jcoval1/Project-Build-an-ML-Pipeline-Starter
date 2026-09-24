@@ -50,22 +50,44 @@ def go(config: DictConfig):
             )
 
         if "basic_cleaning" in active_steps:
-            ##################
-            # Implement here #
-            ##################
-            pass
+            _=mlflow.run(
+                config['main']['basic_cleaning_folder'],
+                "main",
+                parameters={
+                    "input_artifact": f"{config['etl']['download']}:latest",
+                    "output_artifact": config["etl"]["output_artifact"],
+                    "output_type": "raw_data",
+                    "output_description": "Cleaned file",
+                    "min_price": config["etl"]["min_price"],
+                    "max_price": config["etl"]["max_price"],
+                },
+            )
 
         if "data_check" in active_steps:
-            ##################
-            # Implement here #
-            ##################
-            pass
+            _=mlflow.run(
+                config['main']['data_check_folder'],
+                "main",
+                parameters={
+                    "csv": f"{config['etl']['output_artifact']}:latest",
+                    "ref": f"{config['etl']['output_artifact']}:reference",
+                    "kl_threshold": config["data_check"]["kl_threshold"],
+                    "min_price": config["etl"]["min_price"],
+                    "max_price": config["etl"]["max_price"],
+
+                },
+            )
 
         if "data_split" in active_steps:
-            ##################
-            # Implement here #
-            ##################
-            pass
+            _=mlflow.run(
+                f"{config['main']['components_repository']}/train_val_test_split",
+                "main",
+                parameters={
+                    "input": f"{config['etl']['output_artifact']}:latest",
+                    "test_size": config['modeling']['test_size'],
+                    "random_seed": config['modeling']['random_seed'],
+                    "stratify_by": config['modeling']['stratify_by'],
+                },
+            )
 
         if "train_random_forest" in active_steps:
 
@@ -76,12 +98,19 @@ def go(config: DictConfig):
 
             # NOTE: use the rf_config we just created as the rf_config parameter for the train_random_forest
             # step
-
-            ##################
-            # Implement here #
-            ##################
-
-            pass
+            _=mlflow.run(
+                config["main"]["train_random_forest_folder"],
+                "main",
+                parameters={
+                    "trainval_artifact": f"{config["modeling"]["trainval_artifact"]}:latest",
+                    "val_size": config["modeling"]["val_size"],
+                    "random_seed": config["modeling"]["random_seed"],
+                    "stratify_by": config["modeling"]["stratify_by"],
+                    "rf_config": rf_config,
+                    "max_tfidf_features": config["modeling"]["max_tfidf_features"],
+                    "output_artifact": config["modeling"]["output_artifact"],
+                },
+            )
 
         if "test_regression_model" in active_steps:
 

@@ -2,11 +2,16 @@ main:
   components_repository: "components"
   # All the intermediate files will be copied to this directory at the end of the run.
   # Set this to null if you are running in prod
+  basic_cleaning_folder: "src/basic_cleaning"
+  data_check_folder: "src/data_check"
+  train_random_forest_folder: "src/train_random_forest"
   project_name: nyc_airbnb
   experiment_name: development
   steps: all
 etl:
   sample: "sample1.csv"
+  download: "sample.csv"
+  output_artifact: "clean_sample.csv"
   min_price: 10  # dollars
   max_price: 350  # dollars
 data_check:
@@ -25,6 +30,8 @@ modeling:
   max_tfidf_features: 5
   # NOTE: you can put here any parameter that is accepted by the constructor of
   # RandomForestRegressor. This is a subsample, but more could be added:
+  trainval_artifact: "trainval_data.csv"
+  output_artifact: "random_forest_export"
   random_forest:
     n_estimators: 100
     max_depth: 15
